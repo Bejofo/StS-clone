@@ -1,6 +1,6 @@
 WebFont.load({
     google: {
-        families: ['Kreon']
+        families: ['Kreon'] // Same font Sts uses.
     },
     active: e => {
         console.log("font loaded!");
@@ -17,18 +17,18 @@ document.body.appendChild(app.view);
 
 
 
-class card {
+class Card {
     constructor(title) {
         this.title = title;
     }
     generateSprite(x, y, i) {
         const graphics = new PIXI.Graphics();
-        graphics.lineStyle(3, 0x5e4a3a, 1);
-        graphics.beginFill(0xefdecd, 1);
-        graphics.drawRoundedRect(0, 0, 200, 300, 16);
+        graphics.lineStyle(3, 0x5e4a3a, 1); // Oak color
+        graphics.beginFill(0xefdecd, 1); // Almond color
+        graphics.drawRoundedRect(0, 0, 200, 300, 16);  
         graphics.endFill();
         var texture = app.renderer.generateTexture(graphics);
-        var c = new PIXI.Sprite(texture);
+        var blankCard = new PIXI.Sprite(texture);
         var card = new PIXI.Container();
         var text = new PIXI.Text(this.title, {
             fontFamily: 'Kreon',
@@ -37,9 +37,8 @@ class card {
         });
         text.anchor.set(0.5, 0);
         text.x = 100;
-        card.addChild(c);
+        card.addChild(blankCard);
         card.addChild(text);
-        c = card;
 
         function onDragStart(event) {
             // store a reference to the data
@@ -61,26 +60,18 @@ class card {
                 y: this.y,
                 r: this.rotation
             };
-			const dt = (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2);
+			const dt = (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2); // Good luck reading that
             var t = dt(app.view.width / 2, app.view.height + 500, this.ox, this.oy);
-            /*if(t-coords.r>Math.PI){
-            	t-=2*Math.PI;
-            } else if(coords.r-t>Math.PI){
-            	t+=2*Math.PI;
-            }*/
             t - coords.r > Math.PI ? t -= 2 * Math.PI : (coords.r - t > Math.PI ? t += 2 * Math.PI : null) // Send help
-            //t=t-coords.r>Math.PI?t-2*Math.PI:(); // I want to die
-            console.log(coords.r, t);
             this.zIndex = this.oz
             const tween = new TWEEN.Tween(coords) // Create a new tween that modifies 'coords'.
                 .to({
                     x: this.ox,
                     y: this.oy,
                     r: t
-                }, 340) // Move to (300, 200) in 1 second.
+                }, 340) // Miliseconds
                 .easing(TWEEN.Easing.Back.Out) // Quadratic.Out
                 .onUpdate(() => { // Called after tween.js updates 'coords'.
-                    // Move 'box' to the position described by 'coords' with a CSS translation.
                     this.x = coords.x;
                     this.y = coords.y;
                     this.rotation = coords.r;
@@ -100,15 +91,15 @@ class card {
         }
 
         // enable the bunny to be interactive... this will allow it to respond to mouse and touch events
-        c.interactive = true;
+        card.interactive = true;
         // this button mode will mean the hand cursor appears when you roll over the bunny with your mouse
-        c.buttonMode = true;
+        card.buttonMode = true;
         // center the bunny's anchor point
-        c.pivot.x = 100;
-        c.pivot.y = 150;
+        card.pivot.x = 100;
+        card.pivot.y = 150;
         //c.pivot.y = c.height / 2;
-        c.scale.set(0.4);
-        c
+        card.scale.set(0.4);
+        card
             .on('pointerdown', onDragStart)
             .on('pointerup', onDragEnd)
             .on('pointerupoutside', onDragEnd)
@@ -123,14 +114,14 @@ class card {
         // .on('touchend', onDragEnd)
         // .on('touchendoutside', onDragEnd)
         // .on('touchmove', onDragMove);
-        c.x = x;
-        c.y = y;
-        c.ox = x;
-        c.oy = y;
-        c.oz = i;
-        c.zIndex = i;
-        c.rotation = this.determineTilt(app.view.width / 2, app.view.height + 500, x, y);
-        return c;
+        card.x = x;
+        card.y = y;
+        card.ox = x;
+        card.oy = y;
+        card.oz = i;
+        card.zIndex = i;
+        card.rotation = this.determineTilt(app.view.width / 2, app.view.height + 500, x, y);
+        return card;
     }
 	determineTilt(cx, cy, x, y) { // one-liner unreadable version : (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2)
         var theta = Math.atan((y - cy) / (x - cx)) + Math.PI / 2;
@@ -163,7 +154,7 @@ function init() {
         x += app.view.width / 2; // Arc center is at (400,110)
         y += app.view.height + 500;
         //console.log(x,y)
-		var a = new card("Test");
+		var a = new Card("Test");
         app.stage.addChild(a.generateSprite(x,y,i));
     }
 
