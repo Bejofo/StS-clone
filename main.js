@@ -17,8 +17,14 @@ document.body.appendChild(app.view);
 
 
 class Card {
-    constructor(title) {
-        this.title = title;
+    constructor(card) {
+		this.effect = Object.assign({},card.effect);
+		this.upgradedEffect = Object.assign({},card.upgradedEffect);
+		this.upgrade = card.upgrade;
+		this.desc = card.description;
+		this.baseCost = card.baseCost.valueOf();
+		this.id = card.id.valueOf();
+        this.title = card.title.valueOf();
 		this.sprite = null;
     }
     generateSprite(x, y, i) {
@@ -30,15 +36,25 @@ class Card {
         var texture = app.renderer.generateTexture(graphics);
         var blankCard = new PIXI.Sprite(texture);
         var card = new PIXI.Container();
-        var text = new PIXI.Text(this.title, {
+        var title = new PIXI.Text(this.title, {
             fontFamily: 'Kreon',
             fontSize: 36,
             fill: 0x000000,
         });
-        text.anchor.set(0.5, 0);
-        text.x = 100;
+        title.anchor.set(0.5, 0);
+        title.x = 100;
+		var desc = new PIXI.Text(this.desc(), {
+            fontFamily: 'Kreon',
+            fontSize: 32,
+            fill: 0x000000,
+			wordWrap:true
+        });
+        desc.anchor.set(0.5, 0);
+        desc.x = 100;
+		desc.y = 50;
         card.addChild(blankCard);
-        card.addChild(text);
+        card.addChild(title);
+		card.addChild(desc);
 
         function onDragStart(event) {
             // store a reference to the data
@@ -162,7 +178,7 @@ class Card {
         var theta = ((starting - ending) / 9) * i; // Calcute the degrees of seperateion between each card. 
 		console.log(theta);
         theta += (5 / 6) * Math.PI; // I don't know why I need this
-		theta += (10-c)*(0.5235987755982991/9);
+		theta += (10-c)*(0.5235987755982991/9); // That huge number is ((5 / 3) * Math.PI - (4 / 3) * Math.PI )/2
 		console.log(theta);
         var r = 600;
         var x = r * Math.sin(theta);
@@ -170,10 +186,10 @@ class Card {
         x += app.view.width / 2; // Arc center is at (400,110)
         y += app.view.height + 500;
         //console.log(x,y)
-		var a = new Card("Test");
+		var a = new Card(strike);
 		cards.push(a);
 		a.generateSprite(x,y,i);
-        app.stage.addChild(		a.sprite );
+        app.stage.addChild(	a.sprite );
     }
 	}
 	
@@ -203,13 +219,13 @@ class Card {
         var y = r * Math.cos(theta);
         x += app.view.width / 2; // Arc center is at (400,110)
         y += app.view.height + 500;
-		var a = new Card("Test");
+		var a = new Card(strike);
 		cards.push(a);
 		a.generateSprite(x,y,i);
         app.stage.addChild(a.sprite );
 		}
 	}
-	oldSpreadcards(2);
+	oldSpreadcards(3);
 	//console.log(startingDegreeAndIncremnet(10));
 
 
