@@ -67,6 +67,8 @@ class Card {
 			this.offset = Object.assign({}, event.data.global);
 			this.offset.x -= this.x
 			this.offset.y -= this.y
+			var scaly = {s:0.4}
+			const tween = new TWEEN.Tween(scaly).to({s:0.7},200).easing(TWEEN.Easing.Quadratic.Out).onUpdate(()=>this.scale.set(scaly.s)).start();
 			//this.pivot.x = this.offset.x;
 			//this.pivot.y = this.offset.y;
 		}
@@ -79,7 +81,8 @@ class Card {
             const coords = {
                 x: this.x,
                 y: this.y,
-                r: this.rotation
+                r: this.rotation,
+				s: this.scale.x
             };
 			const dt = (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2); // Good luck reading that
             var t = dt(app.view.width / 2, app.view.height + 500, this.ox, this.oy);
@@ -89,13 +92,15 @@ class Card {
                 .to({
                     x: this.ox,
                     y: this.oy,
-                    r: t
+                    r: t,
+					s: 0.4
                 }, 340) // Miliseconds
                 .easing(TWEEN.Easing.Back.Out) // Quadratic.Out
                 .onUpdate(() => { // Called after tween.js updates 'coords'.
                     this.x = coords.x;
                     this.y = coords.y;
                     this.rotation = coords.r;
+					this.scale.set(coords.s)
                 })
                 .start();
         }
