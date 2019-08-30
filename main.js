@@ -1,12 +1,11 @@
-WebFont.load({
+/*WebFont.load({
     google: {
         families: ['Kreon'] // Same font Sts uses.
     },
     active: e => {
         console.log("font loaded!");
-        init();
     }
-});
+});*/
 
 const app = new PIXI.Application({
     backgroundColor: 0x1099bb,
@@ -20,6 +19,7 @@ document.body.appendChild(app.view);
 class Card {
     constructor(title) {
         this.title = title;
+		this.sprite = null;
     }
     generateSprite(x, y, i) {
         const graphics = new PIXI.Graphics();
@@ -53,7 +53,6 @@ class Card {
 			this.offset.y -= this.y
 			//this.pivot.x = this.offset.x;
 			//this.pivot.y = this.offset.y;
-			console.log(this.offset);
 		}
 
         function onDragEnd() {
@@ -95,7 +94,7 @@ class Card {
 				this.rotation = dt(app.view.width / 2, app.view.height + 500, n.x - this.offset.x, n.y - this.offset.y)
                 this.x = (n.x - this.offset.x);
                 this.y = (n.y - this.offset.y);
-				console.log(this.offset.x,n.x,this.x);
+				//console.log(this.offset.x,n.x,this.x);
                 //this.dragging = newPosition;
             }
         }
@@ -131,6 +130,7 @@ class Card {
         card.oz = i;
         card.zIndex = i;
         card.rotation = this.determineTilt(app.view.width / 2, app.view.height + 500, x, y);
+		this.sprite = card;
         return card;
     }
 	determineTilt(cx, cy, x, y) { // one-liner unreadable version : (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2)
@@ -143,7 +143,7 @@ class Card {
 
 
 
-function init() {
+//function init() {
     app.stage.sortableChildren = true;
 
     const arc = new PIXI.Graphics();
@@ -153,11 +153,14 @@ function init() {
 
     // Scale mode for pixelation
     //texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-
-
-    for (let i = 0; i < 11; i++) {
-        var theta = (((5 / 3) * Math.PI - (4 / 3) * Math.PI) / 10) * i; // Calcute the degrees of seperateion between each card. 
+		var cards = [];
+	
+	function oldSpreadcards(){
+		for (let i = 0; i < 10; i++) {
+        var theta = (((5 / 3) * Math.PI - (4 / 3) * Math.PI) / 9) * i; // Calcute the degrees of seperateion between each card. 
+		console.log(theta);
         theta += (5 / 6) * Math.PI; // I don't know why I need this
+		console.log(theta);
         var r = 600;
         var x = r * Math.sin(theta);
         var y = r * Math.cos(theta);
@@ -165,9 +168,38 @@ function init() {
         y += app.view.height + 500;
         //console.log(x,y)
 		var a = new Card("Test");
-        app.stage.addChild(a.generateSprite(x,y,i));
+		cards.push(a);
+		a.generateSprite(x,y,i);
+        app.stage.addChild(		a.sprite );
     }
-
+	}
+	newSpreadcards();
+	function newSpreadcards(){
+		for(var i = 0; i < 10; i ++){
+		const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+		var tao = Math.PI/2
+		var starting = map(10,0,10,tao,Math.PI*(5/6)) // change first parameter to num of cards;
+		var ending = tao - (starting - tao);
+		console.log(starting,ending);
+		var increment = (starting-ending)/(10-1) // x-1 
+		increment/=2;
+		var theta = starting + increment*i;
+		//theta += (5/6) * Math.PI;
+		console.log(theta)
+		var r = 600;
+		var x = r * Math.sin(theta);
+        var y = r * Math.cos(theta);
+		debugger;
+        x += app.view.width / 2; // Arc center is at (400,110)
+        y += app.view.height + 500;
+		var a = new Card("Test");
+		cards.push(a);
+		a.generateSprite(x,y,i);
+        app.stage.addChild(	a.sprite );
+		}
+	}
+	
+	//console.log(startingDegreeAndIncremnet(10));
 
 
     function animate(time) {
@@ -176,4 +208,4 @@ function init() {
     }
     requestAnimationFrame(animate);
 
-};
+//};
