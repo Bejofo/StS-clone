@@ -146,20 +146,23 @@ class Card {
 //function init() {
     app.stage.sortableChildren = true;
 
-    const arc = new PIXI.Graphics();
-    arc.lineStyle(5, 0xAA00BB, 1);
-    arc.arc(app.view.width / 2, app.view.height + 500, 600, (4 / 3) * Math.PI, (5 / 3) * Math.PI);
-    app.stage.addChild(arc)
+    // const arc = new PIXI.Graphics();
+    // arc.lineStyle(5, 0xAA00BB, 1);
+    //arc.arc(app.view.width / 2, app.view.height + 500, 600, (4 / 3) * Math.PI, (5 / 3) * Math.PI);
+    //app.stage.addChild(arc)
 
     // Scale mode for pixelation
     //texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 		var cards = [];
-	
-	function oldSpreadcards(){
-		for (let i = 0; i < 10; i++) {
-        var theta = (((5 / 3) * Math.PI - (4 / 3) * Math.PI) / 9) * i; // Calcute the degrees of seperateion between each card. 
+
+	function oldSpreadcards(c){
+		for (let i = 0; i < c; i++) {
+		var starting = (5 / 3) * Math.PI
+		var ending = (4 / 3) * Math.PI
+        var theta = ((starting - ending) / 9) * i; // Calcute the degrees of seperateion between each card. 
 		console.log(theta);
         theta += (5 / 6) * Math.PI; // I don't know why I need this
+		theta += (10-c)*(0.5235987755982991/9);
 		console.log(theta);
         var r = 600;
         var x = r * Math.sin(theta);
@@ -173,32 +176,40 @@ class Card {
         app.stage.addChild(		a.sprite );
     }
 	}
-	newSpreadcards();
-	function newSpreadcards(){
-		for(var i = 0; i < 10; i ++){
-		const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
-		var tao = Math.PI/2
-		var starting = map(10,0,10,tao,Math.PI*(5/6)) // change first parameter to num of cards;
-		var ending = tao - (starting - tao);
-		console.log(starting,ending);
-		var increment = (starting-ending)/(10-1) // x-1 
-		increment/=2;
-		var theta = starting + increment*i;
-		//theta += (5/6) * Math.PI;
-		console.log(theta)
+	
+	function newSpreadcards(c){
+		for(var i = 0; i < c; i ++){
+		//debugger;
+		const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2; 
+		var gapBetweenYandStart = 0.5235987755982991;
+		//debugger;
+		var gap = (c-1)* 0.5235987755982991/9 
+		var starting = Math.PI*1.5 - gap; 
+		var ending = Math.PI*1.5 + gap;
+		
+		
+		
+		const arc = new PIXI.Graphics();
+		arc.lineStyle(5, 0xAA00BB, 1);
+		arc.arc(app.view.width / 2, app.view.height + 500, 600, starting, ending);
+		app.stage.addChild(arc)
+		
+		var inc = gap/c*2;
+		var theta = (inc*i);
+		theta+= (20/24)*Math.PI;
+		console.log(starting,theta,ending);
 		var r = 600;
-		var x = r * Math.sin(theta);
+        var x = r * Math.sin(theta);
         var y = r * Math.cos(theta);
-		debugger;
         x += app.view.width / 2; // Arc center is at (400,110)
         y += app.view.height + 500;
 		var a = new Card("Test");
 		cards.push(a);
 		a.generateSprite(x,y,i);
-        app.stage.addChild(	a.sprite );
+        app.stage.addChild(a.sprite );
 		}
 	}
-	
+	oldSpreadcards(2);
 	//console.log(startingDegreeAndIncremnet(10));
 
 
