@@ -195,41 +195,9 @@ class Card {
 		cards.push(a);
 		a.generateSprite(x,y,i);
         app.stage.addChild(	a.sprite );
-    }
-	}
-	
-	function newSpreadcards(c){
-		for(var i = 0; i < c; i ++){
-		//debugger;
-		const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2; 
-		var gapBetweenYandStart = 0.5235987755982991;
-		//debugger;
-		var gap = (c-1)* 0.5235987755982991/9 
-		var starting = Math.PI*1.5 - gap; 
-		var ending = Math.PI*1.5 + gap;
-		
-		
-		
-		const arc = new PIXI.Graphics();
-		arc.lineStyle(5, 0xAA00BB, 1);
-		arc.arc(app.view.width / 2, app.view.height + 500, 600, starting, ending);
-		app.stage.addChild(arc)
-		
-		var inc = gap/c*2;
-		var theta = (inc*i);
-		theta+= (20/24)*Math.PI;
-		console.log(starting,theta,ending);
-		var r = 600;
-        var x = r * Math.sin(theta);
-        var y = r * Math.cos(theta);
-        x += app.view.width / 2; // Arc center is at (400,110)
-        y += app.view.height + 500;
-		var a = new Card(strike);
-		cards.push(a);
-		a.generateSprite(x,y,i);
-        app.stage.addChild(a.sprite );
 		}
 	}
+	
 	oldSpreadcards(3);
 	//console.log(startingDegreeAndIncremnet(10));
 
