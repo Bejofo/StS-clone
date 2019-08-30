@@ -48,7 +48,13 @@ class Card {
             this.alpha = 0.9;
             this.zIndex = 100;
             this.dragging = true;
-        }
+			this.offset = Object.assign({}, event.data.global);
+			this.offset.x -= this.x
+			this.offset.y -= this.y
+			//this.pivot.x = this.offset.x;
+			//this.pivot.y = this.offset.y;
+			console.log(this.offset);
+		}
 
         function onDragEnd() {
             this.alpha = 1;
@@ -79,14 +85,18 @@ class Card {
                 .start();
         }
 
-        function onDragMove() {
+        function onDragMove(e) {
             if (this.dragging) {
-                const newPosition = this.data.getLocalPosition(this.parent);
-                this.x = newPosition.x;
-                this.y = newPosition.y;
-                //var theta = Math.atan(3/(this.x-400)) + 3.14/2;
-				const dt = (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2)
-                this.rotation = dt(app.view.width / 2, app.view.height + 500, this.x, this.y); // X y of f arc
+                const n = this.data.getLocalPosition(this.parent);
+				const dt = (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2);
+				/*
+                this.x += e.data.originalEvent.movementX;
+                this.y += e.data.originalEvent.movementY;*/
+				this.rotation = dt(app.view.width / 2, app.view.height + 500, n.x - this.offset.x, n.y - this.offset.y)
+                this.x = (n.x - this.offset.x);
+                this.y = (n.y - this.offset.y);
+				console.log(this.offset.x,n.x,this.x);
+                //this.dragging = newPosition;
             }
         }
 
