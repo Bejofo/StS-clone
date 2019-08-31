@@ -45,9 +45,10 @@ class Card {
         title.x = 100;
 		var desc = new PIXI.Text(this.desc(), {
             fontFamily: 'Kreon',
-            fontSize: 32,
+            fontSize: 26,
             fill: 0x000000,
-			wordWrap:true
+			wordWrap:true,
+			wordWrapWidth:180
         });
         desc.anchor.set(0.5, 0);
         desc.x = 100;
@@ -104,7 +105,6 @@ class Card {
                 })
                 .start();
         }
-
         function onDragMove(e) {
             if (this.dragging) {
                 const n = this.data.getLocalPosition(this.parent);
@@ -198,9 +198,8 @@ class Card {
 		}
 	}
 	
-	oldSpreadcards(3);
+	oldSpreadcards(10);
 	//console.log(startingDegreeAndIncremnet(10));
-
 
     function animate(time) {
         requestAnimationFrame(animate);
