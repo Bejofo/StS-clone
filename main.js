@@ -1,16 +1,29 @@
-/*WebFont.load({
+WebFont.load({
     google: {
         families: ['Kreon'] // Same font Sts uses.
     },
     active: e => {
         console.log("font loaded!");
     }
-});*/
+});
+
+const config = {
+	screenWidth:1200,
+	screenHeight:600,
+	cardArcRadius:600,
+	cardArcCenterYOffSet:500,
+	cardWidth:200,
+	cardHeight:300,
+	cardRadius:16,
+	cardInitalScale:0.4,
+	cardZoomedScale:0.7,
+	cardDescFontSize:26
+}
 
 const app = new PIXI.Application({
     backgroundColor: 0x1099bb,
-    width: 1200,
-    height: 600
+    width: config.screenWidth,
+    height: config.screenHeight
 });
 document.body.appendChild(app.view);
 
@@ -31,7 +44,7 @@ class Card {
         const graphics = new PIXI.Graphics();
         graphics.lineStyle(3, 0x5e4a3a, 1); // Oak color
         graphics.beginFill(0xefdecd, 1); // Almond color
-        graphics.drawRoundedRect(0, 0, 200, 300, 16);  
+        graphics.drawRoundedRect(0, 0, config.cardWidth, config.cardHeight, config.cardRadius);  
         graphics.endFill();
         var texture = app.renderer.generateTexture(graphics);
         var blankCard = new PIXI.Sprite(texture);
@@ -45,7 +58,7 @@ class Card {
         title.x = 100;
 		var desc = new PIXI.Text(this.desc(), {
             fontFamily: 'Kreon',
-            fontSize: 26,
+            fontSize: config.cardDescFontSize,
             fill: 0x000000,
 			wordWrap:true,
 			wordWrapWidth:180
@@ -56,7 +69,10 @@ class Card {
         card.addChild(blankCard);
         card.addChild(title);
 		card.addChild(desc);
-
+		function unzoom(){
+			var scaly = {s:this.scale.x}
+			const tween = new TWEEN.Tween(scaly).to({s:0.4},200).easing(TWEEN.Easing.Quadratic.Out).onUpdate(()=>this.scale.set(scaly.s)).start();
+		}
         function onDragStart(event) {
             // store a reference to the data
             // the reason for this is because of multitouch
@@ -68,7 +84,7 @@ class Card {
 			this.offset = Object.assign({}, event.data.global);
 			this.offset.x -= this.x
 			this.offset.y -= this.y
-			var scaly = {s:0.4}
+			var scaly = {s:this.scale.x}
 			const tween = new TWEEN.Tween(scaly).to({s:0.7},200).easing(TWEEN.Easing.Quadratic.Out).onUpdate(()=>this.scale.set(scaly.s)).start();
 			//this.pivot.x = this.offset.x;
 			//this.pivot.y = this.offset.y;
@@ -94,7 +110,7 @@ class Card {
                     x: this.ox,
                     y: this.oy,
                     r: t,
-					s: 0.4
+					s: config.cardInitalScale
                 }, 340) // Miliseconds
                 .easing(TWEEN.Easing.Back.Out) // Quadratic.Out
                 .onUpdate(() => { // Called after tween.js updates 'coords'.
@@ -128,7 +144,7 @@ class Card {
         card.pivot.x = 100;
         card.pivot.y = 150;
         //c.pivot.y = c.height / 2;
-        card.scale.set(0.4);
+        card.scale.set(config.cardInitalScale);
         card
             .on('pointerdown', onDragStart)
             .on('pointerup', onDragEnd)
@@ -150,7 +166,7 @@ class Card {
         card.oy = y;
         card.oz = i;
         card.zIndex = i;
-        card.rotation = this.determineTilt(app.view.width / 2, app.view.height + 500, x, y);
+        card.rotation = this.determineTilt(app.view.width / 2, app.view.height + config.cardArcCenterYOffSet, x, y);
 		this.sprite = card;
         return card;
     }
@@ -171,30 +187,27 @@ class Card {
     // arc.lineStyle(5, 0xAA00BB, 1);
     //arc.arc(app.view.width / 2, app.view.height + 500, 600, (4 / 3) * Math.PI, (5 / 3) * Math.PI);
     //app.stage.addChild(arc)
-
     // Scale mode for pixelation
     //texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 		var cards = [];
 
 	function oldSpreadcards(c){
 		for (let i = 0; i < c; i++) {
-		var starting = (5 / 3) * Math.PI
-		var ending = (4 / 3) * Math.PI
-        var theta = ((starting - ending) / 9) * i; // Calcute the degrees of seperateion between each card. 
-		console.log(theta);
-        theta += (5 / 6) * Math.PI; // I don't know why I need this
-		theta += (10-c)*(0.5235987755982991/9); // That huge number is ((5 / 3) * Math.PI - (4 / 3) * Math.PI )/2
-		console.log(theta);
-        var r = 600;
-        var x = r * Math.sin(theta);
-        var y = r * Math.cos(theta);
-        x += app.view.width / 2; // Arc center is at (400,110)
-        y += app.view.height + 500;
-        //console.log(x,y)
-		var a = new Card(strike);
-		cards.push(a);
-		a.generateSprite(x,y,i);
-        app.stage.addChild(	a.sprite );
+			var starting = (5 / 3) * Math.PI
+			var ending = (4 / 3) * Math.PI
+			var theta = ((starting - ending) / 9) * i; // Calcute the degrees of seperateion between each card. 
+			var idk = (starting - ending)/2;
+			theta += (5 / 6) * Math.PI; // I don't know why I need this
+			theta += (10-c)*(idk/9); // Scale it;; 
+			var r = config.cardArcRadius;
+			var x = r * Math.sin(theta);
+			var y = r * Math.cos(theta);
+			x += app.view.width / 2; // Arc center is at (400,110)
+			y += app.view.height + config.cardArcCenterYOffSet;
+			var a = new Card(strike);
+			cards.push(a);
+			a.generateSprite(x,y,i);
+			app.stage.addChild(a.sprite);
 		}
 	}
 	
