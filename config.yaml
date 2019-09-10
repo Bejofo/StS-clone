@@ -1,0 +1,11 @@
+---
+screenWidth: 1200
+screenHeight: 600
+cardArcRadius: 600
+cardArcCenterYOffSet: 500
+cardWidth: 200
+cardHeight: 300
+cardRadius: 16
+cardInitalScale: 0.4
+cardZoomedScale: 0.7
+cardDescFontSize: 26
