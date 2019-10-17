@@ -146,7 +146,16 @@ class Card {
         }
 
         function onDragEnd() {
-            const n = this.data.getLocalPosition(this.parent);
+            var n = this.data.getLocalPosition(this.parent);
+            var attacked = spritesUnderMouse(n);
+            //debugger;
+            if(attacked != undefined){
+                debugger;
+                var s = cards.map(x=>x.sprite);
+                takeOneOffDeck(s.indexOf(this));
+                respread();
+                return;
+            }
             this.alpha = 1;
             this.dragging = false;
             // set the interaction data to null
@@ -157,27 +166,12 @@ class Card {
                 r: this.rotation,
                 s: this.scale.x
             };
+            /*
             const dt = (cx, cy, x, y) => (x - cx < 0 ? Math.PI : 0) + (Math.atan((y - cy) / (x - cx)) + Math.PI / 2); // Good luck reading that
             var t = dt(app.view.width / 2, app.view.height + 500, this.ox, this.oy);
             t - coords.r > Math.PI ? t -= 2 * Math.PI : (coords.r - t > Math.PI ? t += 2 * Math.PI : null) // Send help
+            */
             this.zIndex = this.oz
-            /*
-            const tween = new TWEEN.Tween(coords) // Create a new tween that modifies 'coords'.
-                .to({
-                    x: this.ox,
-                    y: this.oy,
-                    r: t,
-                    s: config.cardInitalScale
-                }, 340) // Miliseconds
-                .easing(TWEEN.Easing.Back.Out) // Quadratic.Out
-                .onUpdate(() => { // Called after tween.js updates 'coords'.
-                    this.x = coords.x;
-                    this.y = coords.y;
-                    this.rotation = coords.r;
-                    this.scale.set(coords.s)
-                })
-                .start();
-                */
                const tween = new TWEEN.Tween(coords) // Create a new tween that modifies 'coords'.
                 .to({
                     s: config.cardInitalScale
@@ -252,6 +246,21 @@ class Card {
 
 
 
+function spritesUnderMouse(n){
+    var h;
+    monsters.forEach(e => {
+        x = e.sprite.getBounds()
+        //debugger;
+        if(n.y<x.bottom&&n.y>x.top&&n.x<x.right&&n.x>x.left){
+            console.log(e);
+            h = e;
+            return;
+        }
+    });
+    return h;
+}
+
+
 
 //function init() {
 app.stage.sortableChildren = true;
@@ -307,7 +316,7 @@ function respread(){
         if (diff < -Math.PI){
             rot+= 2*Math.PI 
         }
-        console.log(`${i} ${rot} PI`)
+        //console.log(`${i} ${rot} PI`)
         //cards[i].sprite.x = x;
         //cards[i].sprite.y = y;
        //cards[i].sprite.rotation = cards[i].determineTilt(app.view.width / 2, app.view.height + config.cardArcCenterYOffSet, x, y);
@@ -325,14 +334,20 @@ function respread(){
 }
 
 
+monsters = [];
+
 function testMonster(){
     var a = new Monsters(200,200,"Ca");
     a.generateSprite();
-    console.log(a);
+    monsters.push(a);
     app.stage.addChild(a.sprite);
+    return a;
 }
 
 function takeOneOffDeck(c){
+    if (c == -1){
+        return;
+    }
     if(c){
         cards[c].sprite.parent.removeChild(cards[c].sprite);
         cards.splice(c,1);
