@@ -30,6 +30,65 @@ const app = new PIXI.Application({
 document.body.appendChild(app.view);
 
 
+class Monsters {
+    constructor(x,y,title,hp,hpMax){
+        this.guiData = {
+            x:x,
+            y:y,
+            name:title,
+            block:0,
+            hp:hp,
+            hpMax:hpMax,
+            statusEffects: []
+        }
+    }
+    generateSprite(x,y){
+        const graphics = new PIXI.Graphics();
+        graphics.lineStyle(3, 0x5e4a3a, 1); // Oak color
+        graphics.beginFill(0xefdecd, 1); // Almond color
+        graphics.drawRoundedRect(0, 0, config.cardWidth, config.cardHeight, config.cardRadius);
+        graphics.endFill();
+        var texture = app.renderer.generateTexture(graphics);
+        var blankCard = new PIXI.Sprite(texture);
+        var card = new PIXI.Container();
+        var title = new PIXI.Text(this.guiData.name, {
+            fontFamily: 'Kreon',
+            fontSize: 36,
+            fill: 0x000000,
+        });
+        title.anchor.set(0.5, 0);
+        title.x = 100;
+        /*
+        var desc = new PIXI.Text(this.desc(), {
+            fontFamily: 'Kreon',
+            fontSize: config.cardDescFontSize,
+            fill: 0x000000,
+            wordWrap: true,
+            wordWrapWidth: 180
+        });
+        
+        desc.anchor.set(0.5, 0);
+        desc.x = 100;
+        desc.y = 50;
+        */
+        card.addChild(blankCard);
+        card.addChild(title);
+        //card.addChild(desc);
+        // enable the bunny to be interactive... this will allow it to respond to mouse and touch events
+        card.interactive = true;
+        // this button mode will mean the hand cursor appears when you roll over the bunny with your mouse
+        card.buttonMode = true;
+        // center the bunny's anchor point
+        card.pivot.x = 100;
+        card.pivot.y = 150;
+        //c.pivot.y = c.height / 2;
+        card.scale.set(config.cardInitalScale);
+        card.x = this.guiData.x;
+        card.y = this.guiData.y;
+        this.sprite = card;
+        return card;
+    }
+}
 
 class Card {
     constructor(card) {
@@ -43,13 +102,7 @@ class Card {
         this.sprite = null;
     }
     generateSprite(x, y, i) {
-        const graphics = new PIXI.Graphics();
-        graphics.lineStyle(3, 0x5e4a3a, 1); // Oak color
-        graphics.beginFill(0xefdecd, 1); // Almond color
-        graphics.drawRoundedRect(0, 0, config.cardWidth, config.cardHeight, config.cardRadius);
-        graphics.endFill();
-        var texture = app.renderer.generateTexture(graphics);
-        var blankCard = new PIXI.Sprite(texture);
+        var blankCard = GraphicGenerator.blankCard(config.cardWidth,config.cardHeight, config.cardRadius,0x5e4a3a,0xefdecd);
         var card = new PIXI.Container();
         var title = new PIXI.Text(this.title, {
             fontFamily: 'Kreon',
@@ -93,6 +146,7 @@ class Card {
         }
 
         function onDragEnd() {
+            const n = this.data.getLocalPosition(this.parent);
             this.alpha = 1;
             this.dragging = false;
             // set the interaction data to null
@@ -107,6 +161,7 @@ class Card {
             var t = dt(app.view.width / 2, app.view.height + 500, this.ox, this.oy);
             t - coords.r > Math.PI ? t -= 2 * Math.PI : (coords.r - t > Math.PI ? t += 2 * Math.PI : null) // Send help
             this.zIndex = this.oz
+            /*
             const tween = new TWEEN.Tween(coords) // Create a new tween that modifies 'coords'.
                 .to({
                     x: this.ox,
@@ -122,6 +177,17 @@ class Card {
                     this.scale.set(coords.s)
                 })
                 .start();
+                */
+               const tween = new TWEEN.Tween(coords) // Create a new tween that modifies 'coords'.
+                .to({
+                    s: config.cardInitalScale
+                }, 340) // Miliseconds
+                .easing(TWEEN.Easing.Back.Out) // Quadratic.Out
+                .onUpdate(() => { // Called after tween.js updates 'coords'.
+                    this.scale.set(coords.s)
+                })
+                .start();
+               respread();
         }
         function onDragMove(e) {
             if (this.dragging) {
@@ -177,6 +243,11 @@ class Card {
         theta += x - cx < 0 ? Math.PI : 0;
         return theta;
     }
+
+    determineTiltRaw(cx, cy, x, y) { // one-liner unreadable version : (cx,cy,x,y)=>(x-cx<0?Math.PI:0)+(Math.atan((y-cy)/(x-cx))+Math.PI/2)
+        var theta = Math.atan((y - cy) / (x - cx)) + Math.PI / 2;
+        return theta;
+    }
 }
 
 
@@ -210,6 +281,65 @@ function oldSpreadcards(c) {
         cards.push(a);
         a.generateSprite(x, y, i);
         app.stage.addChild(a.sprite);
+    }
+}
+
+function respread(){
+    var c = cards.length;
+    for (let i = 0; i < cards.length; i++) {
+        var starting = config.cardStartingArcAngle;
+        var ending = config.cardEndingArcAngle;
+        var theta = ((starting - ending) / 9) * i; // Calcute the degrees of seperateion between each card. 
+        var idk = (starting - ending) / 2;
+        theta += (5 / 6) * Math.PI; // I don't know why I need this
+        theta += (10 - c) * (idk / 9); // Scale it;; 
+        var r = config.cardArcRadius;
+        var x = r * Math.sin(theta);
+        var y = r * Math.cos(theta);
+        x += app.view.width / 2; // Arc center is at (400,110)
+        y += app.view.height + config.cardArcCenterYOffSet;
+        var rot = cards[i].determineTilt(app.view.width / 2, app.view.height + config.cardArcCenterYOffSet, x, y);
+        var diff = rot-cards[i].sprite.rotation;
+        if (diff > Math.PI){
+            rot-= 2*Math.PI 
+        }
+
+        if (diff < -Math.PI){
+            rot+= 2*Math.PI 
+        }
+        console.log(`${i} ${rot} PI`)
+        //cards[i].sprite.x = x;
+        //cards[i].sprite.y = y;
+       //cards[i].sprite.rotation = cards[i].determineTilt(app.view.width / 2, app.view.height + config.cardArcCenterYOffSet, x, y);
+        const tween = new TWEEN.Tween(cards[i].sprite) // Create a new tween that modifies 'coords'.
+                .to({
+                    x: x,
+                    y: y,
+                    rotation: rot,
+                }, 340) // Miliseconds
+                .easing(TWEEN.Easing.Back.Out) // Quadratic.Out
+                .onUpdate(() => { // Called after tween.js updates 'coords'.
+                })
+                .start();
+    }
+}
+
+
+function testMonster(){
+    var a = new Monsters(200,200,"Ca");
+    a.generateSprite();
+    console.log(a);
+    app.stage.addChild(a.sprite);
+}
+
+function takeOneOffDeck(c){
+    if(c){
+        cards[c].sprite.parent.removeChild(cards[c].sprite);
+        cards.splice(c,1);
+    } else {
+        i = cards.length - 1;
+        cards[i].sprite.parent.removeChild(cards[i].sprite);
+        cards.pop();
     }
 }
 
