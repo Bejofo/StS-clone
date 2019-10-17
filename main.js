@@ -361,6 +361,8 @@ function takeOneOffDeck(c){
 oldSpreadcards(10);
 //console.log(startingDegreeAndIncremnet(10));
 
+testMonster();
+
 function animate(time) {
     requestAnimationFrame(animate);
     TWEEN.update(time);
